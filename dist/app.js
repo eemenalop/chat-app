@@ -9,54 +9,53 @@ const db = await open({
     filename: 'chat.db',
     driver: sqlite3.Database
 });
-async function database() {
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        client_offset TEXT UNIQUE,
-        content TEXT)
-        `);
-}
-database();
+await db.exec(`
+    CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_offset TEXT UNIQUE,
+    content TEXT
+    );
+`);
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     connectionStateRecovery: {}
 });
 app.use(express.static('dist'));
+app.use(express.static('public'));
 const __dirname = dirname(fileURLToPath(import.meta.url));
 app.get('/', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     console.log('a user connected');
+    io.emit('chat message', 'Connected');
     socket.on('chat message', async (msg) => {
         let result;
         try {
-            result = await db.run('INSERT INTO messages (content) VALUES (?)', msg);
+            result = await db.run(`INSERT INTO messages (content) VALUES (?)`, msg);
         }
         catch (e) {
             return;
         }
         console.log('message: ' + msg);
-        io.emit('chat message', msg, result.lastID);
+        io.emit('chat message', msg);
     });
-    socket.on('disconnect', () => {
+    if (!socket.recovered) {
+        try {
+            await db.each(`SELECT id, content FROM messages WHERE id > ?`, [socket.handshake.auth.serverOffset || 0], (_err, row) => {
+                socket.emit('chat messages', row.content, row.id);
+            });
+        }
+        catch (e) {
+            return;
+        }
+    }
+    socket.on('disconnect', async () => {
         console.log('user disconnected');
         io.emit('chat message', 'User disconeccted');
     });
 });
-const auth = socket.handshake?.auth || {};
-if (!socket.recovered) {
-    try {
-        await db.each('SELECT id, content FROM messages WHERE id > ?', [socket.handshake?.auth?.serverOffset || 0], (_err, row) => {
-            socket.emit('chat message', row.content, row.id);
-        });
-    }
-    catch (e) {
-        throw new Error('ERROR!');
-    }
-}
 server.listen(3000, () => {
     console.log('Server running at http://localhost:3000');
 });

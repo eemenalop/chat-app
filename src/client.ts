@@ -3,22 +3,28 @@ const socket = io({
     serverOffset: 0
   }
 });
-const form = document.getElementById('form') as HTMLFormElement;
-const input = document.getElementById('input') as HTMLInputElement;
-const messages = document.getElementById('messages') as HTMLElement;
-const toggeleButton = document.getElementById('toggele-btn') as HTMLButtonElement;
+const form: HTMLFormElement = document.getElementById('form') as HTMLFormElement;
+const input: HTMLInputElement = document.getElementById('input') as HTMLInputElement;
+const messages: HTMLElement = document.getElementById('messages') as HTMLElement;
+const toggleButton: HTMLButtonElement = document.getElementById('toggle-btn') as HTMLButtonElement;
+const modal = document.getElementById("nameModal") as HTMLElement;
+const closeBtn = document.getElementsByClassName("close")[0] as HTMLButtonElement;
+const submitNameBtn = document.getElementById("submitName") as HTMLButtonElement;
+const usernameInput = document.getElementById("username") as HTMLInputElement;
 
-      toggeleButton.addEventListener('click', (e)=>{
+      //Disconnect button
+      toggleButton.addEventListener('click', (e)=>{
         e.preventDefault();
         if(socket.connected){
-          toggeleButton.innerText = 'Connect';
+          toggleButton.innerText = 'Connect';
           socket.disconnect();
         }else{
-          toggeleButton.innerText = 'Disconnect';
+          toggleButton.innerText = 'Disconnect';
           socket.connect();
         }
       });
 
+      //Send message button
       form.addEventListener('submit', (e)=>{
         e.preventDefault();
         if(input.value){
@@ -27,6 +33,7 @@ const toggeleButton = document.getElementById('toggele-btn') as HTMLButtonElemen
         }
       });
 
+      //li message
       socket.on('chat message', (msg: string, serverOffset: any)=>{
         const item = document.createElement('li');
         item.textContent = msg;
@@ -38,3 +45,6 @@ const toggeleButton = document.getElementById('toggele-btn') as HTMLButtonElemen
       socket.on('connect', () => {
         console.log('Connected to the server!');
       });
+
+
+    
