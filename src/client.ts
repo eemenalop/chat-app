@@ -7,10 +7,6 @@ const form: HTMLFormElement = document.getElementById('form') as HTMLFormElement
 const input: HTMLInputElement = document.getElementById('input') as HTMLInputElement;
 const messages: HTMLElement = document.getElementById('messages') as HTMLElement;
 const toggleButton: HTMLButtonElement = document.getElementById('toggle-btn') as HTMLButtonElement;
-const modal = document.getElementById("nameModal") as HTMLElement;
-const closeBtn = document.getElementsByClassName("close")[0] as HTMLButtonElement;
-const submitNameBtn = document.getElementById("submitName") as HTMLButtonElement;
-const usernameInput = document.getElementById("username") as HTMLInputElement;
 
       //Disconnect button
       toggleButton.addEventListener('click', (e)=>{
@@ -45,6 +41,8 @@ const usernameInput = document.getElementById("username") as HTMLInputElement;
       socket.on('connect', () => {
         console.log('Connected to the server!');
       });
+
+      
 
 
     
