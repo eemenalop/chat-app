@@ -32,7 +32,7 @@ const toggeleButton = document.getElementById('toggele-btn') as HTMLButtonElemen
         item.textContent = msg;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
-        socket.auth.serverOffset = serverOffset;
+        (socket as any).auth.serverOffset = serverOffset;
       });
 
       socket.on('connect', () => {
